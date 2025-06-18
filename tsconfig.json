@@ -6,7 +6,13 @@
       "@/*": [
         "./*"
       ]
-    }
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "jsx": "react-native",
+      "moduleResolution": "node"
+    },
+    "include": ["app", "components", "services", "declarations.d.ts"]
   },
   "include": [
     "**/*.ts",
