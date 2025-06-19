@@ -1,6 +1,6 @@
 import React from 'react'
-import { Text, useColorScheme, StyleSheet } from 'react-native'
-export function ThemedText(props) {
+import { Text, useColorScheme, StyleSheet, TextProps } from 'react-native'
+export function ThemedText(props: TextProps) {
   const scheme = useColorScheme()
   return <Text style={[styles.text, scheme === 'dark' ? styles.dark : styles.light]} {...props}/>
 }

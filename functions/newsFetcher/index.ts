@@ -20,7 +20,7 @@ export const newsFetcher = async (req: Request, res: Response): Promise<void> =>
       throw new Error(`NewsAPI request failed with status ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     const articles = (data.articles || []).slice(0, 3);
 
     const writes = articles.map((article: any) => {
