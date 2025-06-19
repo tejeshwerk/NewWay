@@ -1,5 +1,6 @@
-import * as functions from 'firebase-functions';
-import { Firestore } from '@google-cloud/firestore';
+import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
+import { EventContext } from 'firebase-functions';
+import { Firestore, DocumentSnapshot } from '@google-cloud/firestore';
 import { Storage } from '@google-cloud/storage';
 import axios from 'axios';
 
@@ -7,9 +8,7 @@ import axios from 'axios';
 const db = new Firestore({ projectId: 'newway-73103' });
 const storage = new Storage({ projectId: 'newway-73103' });
 
-export const videoCreator = functions.firestore
-  .document(`${process.env.FIRESTORE_COLLECTION}/{docId}`)
-  .onUpdate(async (change, context) => {
+export const videoCreator = onDocumentUpdated(`${process.env.FIRESTORE_COLLECTION}/{docId}`, async (change: { before: DocumentSnapshot; after: DocumentSnapshot }, context: EventContext) => {
     try {
       const beforeData = change.before.data() as any;
       const afterData = change.after.data() as any;
@@ -26,7 +25,7 @@ export const videoCreator = functions.firestore
           }
         );
 
-        const buffer = response.data as Buffer;
+        const buffer = response.data as any;
 
         const bucket = storage.bucket(process.env.GCP_BUCKET_NAME || '');
         const file = bucket.file(`${context.params.docId}.mp4`);

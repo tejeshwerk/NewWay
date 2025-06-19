@@ -42,7 +42,7 @@ export default function HomeScreen() {
           <Text style={[styles.tabLabel, { color: '#AAA' }]}>Local</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabItem}>
-          <MaterialCommunityIcons name="earth-outline" size={24} color="#AAA" />
+          <MaterialCommunityIcons name="earth" size={24} color="#AAA" />
           <Text style={[styles.tabLabel, { color: '#AAA' }]}>World</Text>
         </TouchableOpacity>
       </View>
