@@ -8,16 +8,21 @@ import axios from 'axios';
 const db = new Firestore({ projectId: 'newway-73103' });
 const storage = new Storage({ projectId: 'newway-73103' });
 
-export const videoCreator = onDocumentUpdated(`${process.env.FIRESTORE_COLLECTION}/{docId}`, async (change: { before: DocumentSnapshot; after: DocumentSnapshot }, context: EventContext) => {
+export const videoCreator = onDocumentUpdated(
+  `${process.env.FIRESTORE_COLLECTION}/{docId}`,
+  async (
+    change: { before: DocumentSnapshot; after: DocumentSnapshot },
+    ctx: EventContext
+  ) => {
     try {
-      const beforeData = change.before.data() as any;
-      const afterData = change.after.data() as any;
+      const before = change.before.data() as any;
+      const after = change.after.data() as any;
 
-      if (!beforeData.script && afterData.script && !beforeData.videoUrl) {
-        const { script } = afterData;
+      if (!before.script && after.script && !after.videoUrl) {
+        const { script } = after;
 
-        const response = await axios.post(
-          process.env.VEO_API_ENDPOINT || '',
+        const resp = await axios.post(
+          process.env.VEO_API_ENDPOINT as string,
           { script, resolution: '720p' },
           {
             headers: { Authorization: `Bearer ${process.env.VEO_API_KEY}` },
@@ -25,21 +30,22 @@ export const videoCreator = onDocumentUpdated(`${process.env.FIRESTORE_COLLECTIO
           }
         );
 
-        const buffer = response.data as any;
+        const buffer = Buffer.from(resp.data);
 
-        const bucket = storage.bucket(process.env.GCP_BUCKET_NAME || '');
-        const file = bucket.file(`${context.params.docId}.mp4`);
+        const bucket = storage.bucket(process.env.GCP_BUCKET_NAME as string);
+        const file = bucket.file(`${ctx.params.docId}.mp4`);
         await file.save(buffer, { contentType: 'video/mp4' });
 
-        const videoUrl = `https://storage.googleapis.com/${process.env.GCP_BUCKET_NAME}/${context.params.docId}.mp4`;
+        const videoUrl = `https://storage.googleapis.com/${process.env.GCP_BUCKET_NAME}/${ctx.params.docId}.mp4`;
 
         await db
-          .collection(process.env.FIRESTORE_COLLECTION || 'videos')
-          .doc(context.params.docId)
+          .collection(process.env.FIRESTORE_COLLECTION as string)
+          .doc(ctx.params.docId)
           .update({ videoUrl, videoGeneratedAt: new Date() });
       }
     } catch (error) {
       console.error('videoCreator error:', error);
     }
     return null;
-  });
+  }
+);
