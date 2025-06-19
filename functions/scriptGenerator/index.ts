@@ -1,8 +1,7 @@
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import { EventContext } from 'firebase-functions';
-import { Firestore, DocumentSnapshot } from '@google-cloud/firestore';
+import { Firestore } from '@google-cloud/firestore';
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+import cheerio from 'cheerio';
 import OpenAI from 'openai';
 
 // Initialize Firestore targeting the specific project
@@ -10,7 +9,7 @@ const db = new Firestore({ projectId: 'newway-73103' });
 
 export const scriptGenerator = onDocumentCreated(
   `${process.env.FIRESTORE_COLLECTION}/{docId}`,
-  async (snap: DocumentSnapshot, ctx: EventContext) => {
+  async (snap: FirebaseFirestore.DocumentSnapshot, ctx: any) => {
     try {
       const { url, headline } = snap.data() as {
         headline?: string;
@@ -23,9 +22,10 @@ export const scriptGenerator = onDocumentCreated(
       }
 
       const resp = await axios.get(url);
-      const $ = cheerio.load(resp.data);
+      const html: string = resp.data;
+      const $ = cheerio.load(html);
       const articleText = $('p')
-        .map((i, el) => $(el).text())
+        .map((i: number, el: any) => $(el).text())
         .get()
         .join(' ');
 
@@ -47,7 +47,7 @@ export const scriptGenerator = onDocumentCreated(
       const script = completion.choices[0].message?.content.trim() || '';
 
       await db
-        .collection(process.env.FIRESTORE_COLLECTION as string)
+        .collection(process.env.FIRESTORE_COLLECTION)
         .doc(ctx.params.docId)
         .update({ script, scriptGeneratedAt: new Date() });
     } catch (error) {
