@@ -8,26 +8,33 @@ import OpenAI from 'openai';
 // Initialize Firestore targeting the specific project
 const db = new Firestore({ projectId: 'newway-73103' });
 
-export const scriptGenerator = onDocumentCreated('videos/{docId}', async (snap: DocumentSnapshot, ctx: EventContext) => {
+export const scriptGenerator = onDocumentCreated(
+  `${process.env.FIRESTORE_COLLECTION}/{docId}`,
+  async (snap: DocumentSnapshot, ctx: EventContext) => {
     try {
-      const data = snap.data() as { headline?: string; url?: string };
-      const { url } = data;
+      const { url, headline } = snap.data() as {
+        headline?: string;
+        url?: string;
+      };
+
       if (!url) {
         console.error('No URL found in document');
         return null;
       }
 
-      const response = await axios.get(url);
-      const $ = cheerio.load(response.data);
+      const resp = await axios.get(url);
+      const $ = cheerio.load(resp.data);
       const articleText = $('p')
-        .map((_: any, el: any) => $(el).text())
+        .map((i, el) => $(el).text())
         .get()
         .join(' ');
 
-      const text =
+      const trimmedText =
         articleText.length > 1000 ? articleText.slice(0, 1000) : articleText;
 
-      const prompt = `Generate a playful 30-second voiceover script with scene descriptions for a video based on this article:\n${text}`;
+      const prompt =
+        'Create a playful 30-second voiceover script with scene descriptions for a video based on this article text:\n\n' +
+        trimmedText;
 
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const completion = await openai.chat.completions.create({
@@ -39,12 +46,13 @@ export const scriptGenerator = onDocumentCreated('videos/{docId}', async (snap: 
 
       const script = completion.choices[0].message?.content.trim() || '';
 
-      await db.collection('videos').doc(ctx.params.docId).update({
-        script,
-        scriptGeneratedAt: new Date(),
-      });
+      await db
+        .collection(process.env.FIRESTORE_COLLECTION as string)
+        .doc(ctx.params.docId)
+        .update({ script, scriptGeneratedAt: new Date() });
     } catch (error) {
       console.error('scriptGenerator error:', error);
     }
     return null;
-  });
+  }
+);
