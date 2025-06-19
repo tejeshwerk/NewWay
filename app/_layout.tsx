@@ -1,11 +1,35 @@
-import React from 'react'
-import { Slot } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import React from 'react';
+import { Tabs } from 'expo-router';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function RootLayout() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0D0D0D' }}>
-      <Slot />
-    </SafeAreaView>
-  )
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#000',
+          borderRadius: 16,
+          margin: 16,
+          height: 60
+        }
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'For You',
+          tabBarIcon: () => (
+            <MaterialCommunityIcons
+              name="bookmark"
+              size={24}
+              color="#007AFF"
+            />
+          )
+        }}
+      />
+      {/* Add other tabs (headlines, local, world) here by creating
+          additional files under app/ and adding Tabs.Screen entries */}
+    </Tabs>
+  );
 }
