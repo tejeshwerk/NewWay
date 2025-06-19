@@ -32,6 +32,11 @@ declare module '@google-cloud/firestore' {
     data(): any;
   }
 }
+declare namespace FirebaseFirestore {
+  interface DocumentSnapshot {
+    data(): any;
+  }
+}
 declare module '@google-cloud/storage' {
   export class Storage {
     constructor(options?: any);
