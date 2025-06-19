@@ -5,10 +5,17 @@ declare namespace JSX {
   }
 }
 
-declare module 'react';
+declare module 'react' {
+  export function useState<T>(initial: T): [T, (v: T) => void];
+  export function useEffect(effect: any, deps?: any[]): void;
+  const React: any;
+  export default React;
+}
 declare module 'react-native' {
   export const Text: any;
   export const View: any;
+  export const FlatList: any;
+  export const ActivityIndicator: any;
   export const SafeAreaView: any;
   export const useColorScheme: any;
   export const StyleSheet: any;
@@ -78,3 +85,16 @@ declare module 'express' {
 
 declare var process: any;
 declare var Buffer: any;
+declare module 'expo-av' {
+  export const Video: any;
+}
+declare module 'firebase/app'
+declare module 'firebase/firestore' {
+  export interface DocumentData { [key: string]: any }
+  export const getFirestore: any;
+  export const collection: any;
+  export const query: any;
+  export const orderBy: any;
+  export const onSnapshot: any;
+  export const limit: any;
+}
